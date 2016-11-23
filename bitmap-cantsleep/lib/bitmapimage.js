@@ -25,17 +25,38 @@ BitmapImage.prototype.load = function(file, onLoad) {
   });
 };
 
-BitmapImage.prototype.createInvertedImage = function(newFile, callback) {
+BitmapImage.prototype.transform = function(newFile, callback, transformation) {
   let offset = this.dataOffset;
   for (let y = 0; y < this.height; y++) {
     for (let x = 0; x < this.width; x++) {
-      for (let c = 0; c < 3; c++) {
-        this.data[offset] = 255 - this.data[offset++];
-      }
+      this.data[offset] = transformation(2, this.data[offset++]);
+      this.data[offset] = transformation(1, this.data[offset++]);
+      this.data[offset] = transformation(0, this.data[offset++]);
     }
     offset += (this.width % 4);
   }
   fs.writeFile(newFile, this.data, callback);
+};
+
+BitmapImage.prototype.invert = function(newFile, callback) {
+  this.transform(newFile, callback, function(color, input) {
+    return 255 - input;
+  });
+};
+
+BitmapImage.prototype.greyscale = function(newFile, callback) {
+  this.transform(newFile, callback, function(color, input) {
+    return Math.min(255, input * 1.5);
+  });
+};
+
+BitmapImage.prototype.multiplyColor = function(newFile, options, callback) {
+  this.transform(newFile, callback, function(color, input) {
+    if (options[color])
+      return Math.min(255, input * options[color]);
+    else
+      return input;
+  });
 };
 
 module.exports = BitmapImage;
