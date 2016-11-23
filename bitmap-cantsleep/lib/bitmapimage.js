@@ -13,8 +13,8 @@ BitmapImage.prototype.load = function(file, onLoad) {
     if (err) throw err;
     let LE = os.endianness() === 'LE';
     this.type = (String.fromCharCode(data[0]) + String.fromCharCode(data[1]));
-    this.size = LE ? data.read16IntLE(3) : data.read16IntBE(3);
-    this.dataOffset = LE ? data.read16IntLE(11) : data.read16IntBE(11);
+    this.size = LE ? data.readUInt32LE(2) : data.readUInt32BE(2);
+    this.dataOffset = LE ? data.readUInt32LE(10) : data.readUInt32BE(10);
     console.log('Image loaded: ' + this.type + ', ' + this.size + ', ' + this.dataOffset);
     this.loaded = true;
     onLoad(this);
