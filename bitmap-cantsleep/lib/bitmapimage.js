@@ -30,9 +30,9 @@ BitmapImage.prototype.transform = function(newFile, callback, transformation) {
   let newData = new Buffer(this.data);
   for (let y = 0; y < this.height; y++) {
     for (let x = 0; x < this.width; x++) {
-      newData[offset] = transformation(2, newData[offset++]);
-      newData[offset] = transformation(1, newData[offset++]);
-      newData[offset] = transformation(0, newData[offset++]);
+      let b = newData[offset] = transformation(2, newData[offset++]);
+      let g = newData[offset] = transformation(1, newData[offset++], b);
+      newData[offset] = transformation(0, newData[offset++], g);
     }
     offset += (this.width % 4);
   }
@@ -46,8 +46,10 @@ BitmapImage.prototype.invert = function(newFile, callback) {
 };
 
 BitmapImage.prototype.greyscale = function(newFile, callback) {
-  this.transform(newFile, callback, function(color, input) {
-    return Math.min(255, input/3);
+  this.transform(newFile, callback, function(color, input, prev) {
+    if (prev)
+      return prev; //Not my proudest hackfix, but it works
+    return input;
   });
 };
 
