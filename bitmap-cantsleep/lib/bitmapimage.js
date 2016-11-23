@@ -25,4 +25,17 @@ BitmapImage.prototype.load = function(file, onLoad) {
   });
 };
 
+BitmapImage.prototype.createInvertedImage = function(newFile, callback) {
+  let offset = this.dataOffset;
+  for (let y = 0; y < this.height; y++) {
+    for (let x = 0; x < this.width; x++) {
+      for (let c = 0; c < 3; c++) {
+        this.data[offset] = 255 - this.data[offset++];
+      }
+    }
+    offset += (this.width % 4);
+  }
+  fs.writeFile(newFile, this.data, callback);
+};
+
 module.exports = BitmapImage;
