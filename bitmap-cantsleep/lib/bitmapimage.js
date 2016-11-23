@@ -1,12 +1,24 @@
 'use strict';
 
-function BitmapImage(file) {
-  this.file = file;
-  this.loadBitmap();
+const fs = require('fs');
+const os = require('os');
+
+function BitmapImage() {
+  this.loaded = false;
 }
 
-BitmapImage.prototype.loadBitmap = function() {
-
+BitmapImage.prototype.load = function(file, onLoad) {
+  this.file = file;
+  fs.readFile(file, (err, data) => {
+    if (err) throw err;
+    let LE = os.endianness() === 'LE';
+    this.type = (String.fromCharCode(data[0]) + String.fromCharCode(data[1]));
+    this.size = LE ? data.read16IntLE(3) : data.read16IntBE(3);
+    this.dataOffset = LE ? data.read16IntLE(11) : data.read16IntBE(11);
+    console.log('Image loaded: ' + this.type + ', ' + this.size + ', ' + this.dataOffset);
+    this.loaded = true;
+    onLoad(this);
+  });
 };
 
 module.exports = BitmapImage;
